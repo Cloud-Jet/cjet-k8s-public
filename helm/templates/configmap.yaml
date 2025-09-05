@@ -1,0 +1,47 @@
+# CloudJet ConfigMaps
+{{- range .Values.global.applicationNamespaces }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudjet-config
+  namespace: {{ . }}
+  labels:
+    app: cloudjet
+    component: config
+data:
+  # Flask environment settings
+  FLASK_ENV: {{ $.Values.config.flaskEnv | quote }}
+  PYTHONPATH: {{ $.Values.config.pythonPath | quote }}
+  
+  # Database settings (non-sensitive)
+  DB_HOST: {{ $.Values.config.database.host | quote }}
+  DB_NAME: {{ $.Values.config.database.name | quote }}
+  DB_USER: {{ $.Values.config.database.user | quote }}
+  DB_PORT: {{ $.Values.config.database.port | quote }}
+  DB_POOL_SIZE: {{ $.Values.config.database.poolSize | quote }}
+  
+  # Redis/ElastiCache settings
+  REDIS_HOST: {{ $.Values.config.redis.host | quote }}
+  REDIS_PORT: {{ $.Values.config.redis.port | quote }}
+  REDIS_DB: {{ $.Values.config.redis.db | quote }}
+  REDIS_SSL: {{ $.Values.config.redis.ssl | quote }}
+  
+  # Service port settings
+  AUTH_SERVICE_PORT: {{ $.Values.services.auth.port | quote }}
+  FLIGHT_SERVICE_PORT: {{ $.Values.services.flight.port | quote }}
+  BOOKING_SERVICE_PORT: {{ $.Values.services.booking.port | quote }}
+  PAYMENT_SERVICE_PORT: {{ $.Values.services.payment.port | quote }}
+  ADMIN_SERVICE_PORT: {{ $.Values.services.admin.port | quote }}
+  
+  # Microservice URLs
+  AUTH_SERVICE_URL: {{ $.Values.config.serviceUrls.auth | quote }}
+  FLIGHT_SERVICE_URL: {{ $.Values.config.serviceUrls.flight | quote }}
+  BOOKING_SERVICE_URL: {{ $.Values.config.serviceUrls.booking | quote }}
+  PAYMENT_SERVICE_URL: {{ $.Values.config.serviceUrls.payment | quote }}
+  ADMIN_SERVICE_URL: {{ $.Values.config.serviceUrls.admin | quote }}
+  
+  # Cache TTL settings
+  CACHE_TTL: {{ $.Values.config.cache.ttl | quote }}
+  SEARCH_CACHE_TTL: {{ $.Values.config.cache.searchTtl | quote }}
+{{- end }}

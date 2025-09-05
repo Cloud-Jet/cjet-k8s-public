@@ -1,0 +1,76 @@
+# Kiali Values for CloudJet
+# Service Mesh Observability Dashboard
+
+# Global settings
+fullnameOverride: "kiali"
+namespaceOverride: "monitoring"
+
+# Authentication configuration
+auth:
+  strategy: "anonymous"  # No login required
+
+# Deployment settings
+deployment:
+  cluster_wide_access: true
+  namespace: "monitoring"
+  replicas: 1
+  resources:
+    requests:
+      cpu: "10m"
+      memory: "64Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+# Server configuration
+server:
+  port: 20001
+  web_root: "/kiali"
+  observability:
+    metrics:
+      enabled: true
+      port: 9090
+
+# External services integration
+external_services:
+  custom_dashboards:
+    enabled: true
+  istio:
+    root_namespace: "istio-system"
+  prometheus:
+    url: "http://prometheus-kube-prometheus-prometheus.monitoring:9090"
+  grafana:
+    enabled: true
+    in_cluster_url: "http://grafana.monitoring:80"
+    url: "https://grafana.cloudjet.click"
+  jaeger:
+    enabled: true
+    in_cluster_url: "http://jaeger-query.monitoring:16686"
+    url: "https://jaeger.cloudjet.click"
+
+# Service configuration  
+service:
+  type: ClusterIP
+  annotations: {}
+
+# Ingress disabled (using Istio VirtualService)
+ingress:
+  enabled: false
+
+# Kiali feature flags
+kiali_feature_flags:
+  disabled_features: []
+  validations:
+    ignore:
+    - "KIA1301"  # Ignore certain validation warnings
+
+# Identity configuration
+identity:
+  cert_file: ""
+  private_key_file: ""
+
+# Additional display details
+additional_display_details:
+- annotation: "kiali.io/api-spec"
+  icon_annotation: "kiali.io/api-type" 
+  title: "API Documentation"

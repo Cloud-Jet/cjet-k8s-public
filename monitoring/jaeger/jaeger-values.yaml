@@ -1,0 +1,70 @@
+# Jaeger All-in-One Values for CloudJet
+# Distributed tracing for microservices in single container
+
+# Global settings
+fullnameOverride: "jaeger"
+namespaceOverride: "monitoring"
+
+# All-in-One configuration
+allInOne:
+  enabled: true
+  image:
+    registry: ""
+    repository: jaegertracing/all-in-one
+    tag: "1.50"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+  
+  # Storage configuration - use memory storage for simplicity
+  args:
+    - --memory.max-traces=50000
+    - --log-level=info
+
+# Disable other components when using all-in-one
+agent:
+  enabled: false
+
+collector:
+  enabled: false
+
+query:
+  enabled: false
+
+storage:
+  type: memory
+
+# Service configuration
+service:
+  type: ClusterIP
+  ports:
+    - name: query-http
+      port: 16686
+      targetPort: 16686
+    - name: collector-grpc
+      port: 14250
+      targetPort: 14250
+    - name: collector-http
+      port: 14268
+      targetPort: 14268
+    - name: zipkin
+      port: 9411
+      targetPort: 9411
+
+# Ingress configuration (if needed)
+ingress:
+  enabled: false
+
+# ServiceMonitor for Prometheus integration
+serviceMonitor:
+  enabled: true
+  labels:
+    app: jaeger
+  interval: 30s
+
+# Remove UI Configuration section as it's causing issues

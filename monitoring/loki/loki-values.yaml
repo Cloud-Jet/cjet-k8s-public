@@ -1,0 +1,147 @@
+# Loki Stack Values for CloudJet
+# Centralized logging for microservices
+
+# Loki configuration
+loki:
+  enabled: true
+  
+  # Use single binary mode (simpler than microservices)
+  deployment:
+    replicas: 1
+  
+  # Resources
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # Storage configuration (temporary memory, will upgrade later)
+  config:
+    auth_enabled: false
+    
+    server:
+      http_listen_port: 3100
+      grpc_listen_port: 9096
+    
+    common:
+      path_prefix: /var/loki
+      storage:
+        filesystem:
+          chunks_directory: /var/loki/chunks
+          rules_directory: /var/loki/rules
+      replication_factor: 1
+      ring:
+        kvstore:
+          store: inmemory
+    
+    query_scheduler:
+      max_outstanding_requests_per_tenant: 32768
+    
+    schema_config:
+      configs:
+        - from: 2020-10-24
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+    
+    # Retention policy (keep logs for 7 days)
+    limits_config:
+      retention_period: 168h  # 7 days
+      max_query_length: 721h  # ~30 days
+      max_query_parallelism: 32
+      max_streams_per_user: 10000
+      max_line_size: 256000
+    
+    chunk_store_config:
+      max_look_back_period: 168h
+    
+    table_manager:
+      retention_deletes_enabled: true
+      retention_period: 168h
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 3100
+
+# Promtail configuration (log collector)
+promtail:
+  enabled: true
+  
+  # Deploy as DaemonSet on all nodes
+  daemonset:
+    enabled: true
+  
+  # Resources
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  
+  # Promtail configuration
+  config:
+    server:
+      http_listen_port: 3101
+      grpc_listen_port: 0
+    
+    positions:
+      filename: /run/promtail/positions.yaml
+    
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+    
+    scrape_configs:
+      # Kubernetes pod logs
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        pipeline_stages:
+          - docker: {}
+        relabel_configs:
+          # Only scrape pods that have a name label
+          - source_labels: [__meta_kubernetes_pod_name]
+            regex: .+
+            action: keep
+          # Add namespace label
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          # Add pod name label
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          # Add container name label
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          # Add app label if exists
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+          # Add service label if exists
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            target_label: service
+
+# Grafana integration (if grafana is installed)
+grafana:
+  enabled: false  # We'll configure this separately
+  
+# Service Monitor for Prometheus integration
+serviceMonitor:
+  enabled: true
+  labels:
+    app: loki
+  interval: 30s
+
+# Network Policy (optional)
+networkPolicy:
+  enabled: false
+
+# Test pods for validation
+test:
+  enabled: false

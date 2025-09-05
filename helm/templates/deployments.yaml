@@ -1,0 +1,82 @@
+# CloudJet Microservices Deployments
+{{- range $serviceName, $service := .Values.services }}
+{{- if $service.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $service.name }}
+  namespace: {{ $service.namespace | default $.Values.global.namespace }}
+  labels:
+    app: {{ $service.name }}
+    service: {{ $serviceName }}
+    version: {{ $.Chart.AppVersion }}
+spec:
+  replicas: {{ $service.replicas }}
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ $service.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $service.name }}
+        service: {{ $serviceName }}
+        version: {{ $.Chart.AppVersion }}
+    spec:
+      {{- if $.Values.secrets.externalSecrets.enabled }}
+      serviceAccountName: {{ $.Values.secrets.externalSecrets.serviceAccountName }}
+      {{- end }}
+      containers:
+      - name: {{ $service.name }}
+        image: {{ $service.image.repository }}:{{ $service.image.tag }}
+        imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
+        ports:
+        - containerPort: {{ $service.port }}
+        
+        # Environment variables from ConfigMap and Secret
+        envFrom:
+        - configMapRef:
+            name: cloudjet-config
+        - secretRef:
+            name: cloudjet-secrets
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            {{- if eq $serviceName "auth" }}
+            path: /api/auth/health
+            {{- else if eq $serviceName "booking" }}
+            path: /api/bookings/health
+            {{- else if eq $serviceName "flight" }}
+            path: /api/flights/health
+            {{- else if eq $serviceName "payment" }}
+            path: /api/payments/health
+            {{- else if eq $serviceName "admin" }}
+            path: /api/admin/health
+            {{- end }}
+            port: {{ $service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            {{- if eq $serviceName "auth" }}
+            path: /api/auth/health
+            {{- else if eq $serviceName "booking" }}
+            path: /api/bookings/health
+            {{- else if eq $serviceName "flight" }}
+            path: /api/flights/health
+            {{- else if eq $serviceName "payment" }}
+            path: /api/payments/health
+            {{- else if eq $serviceName "admin" }}
+            path: /api/admin/health
+            {{- end }}
+            port: {{ $service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        
+        # Resource limits
+        resources:
+          {{- toYaml $service.resources | nindent 10 }}
+{{- end }}
+{{- end }}

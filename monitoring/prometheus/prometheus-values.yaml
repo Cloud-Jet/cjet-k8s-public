@@ -1,0 +1,146 @@
+# Prometheus Stack Values for CloudJet
+# This includes Prometheus, Grafana, and Alertmanager
+
+# Global settings
+fullnameOverride: "prometheus"
+namespaceOverride: "monitoring"
+
+# Prometheus configuration
+prometheus:
+  prometheusSpec:
+    # Storage
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp2
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+    
+    # Service monitor configs for Istio integration
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    
+    # Retention
+    retention: 15d
+    retentionSize: 18GB
+    
+    # Resource limits
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
+
+# Grafana configuration
+grafana:
+  enabled: true
+  
+  # Admin credentials (change these in production)
+  adminPassword: "cloudjet-admin"
+  
+  # Storage
+  persistence:
+    enabled: true
+    storageClassName: gp2
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 3000
+  
+  # Resources
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# Alertmanager configuration
+alertmanager:
+  alertmanagerSpec:
+    # Storage
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp2
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+    
+    # Resources
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "200m"
+
+# Node Exporter (for node metrics)
+nodeExporter:
+  enabled: true
+
+# kube-state-metrics (for Kubernetes object metrics)
+kubeStateMetrics:
+  enabled: true
+
+# Additional scraping configs for Istio
+additionalScrapeConfigs: |
+  - job_name: 'istio-mesh'
+    kubernetes_sd_configs:
+    - role: endpoints
+      namespaces:
+        names:
+        - istio-system
+        - user
+        - admin
+        - monitoring
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+      action: keep
+      regex: istio-proxy;http-monitoring
+  - job_name: 'istio-policy'
+    kubernetes_sd_configs:
+    - role: endpoints
+      namespaces:
+        names:
+        - istio-system
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+      action: keep
+      regex: istio-policy;http-policy-monitoring
+  - job_name: 'istio-telemetry'
+    kubernetes_sd_configs:
+    - role: endpoints
+      namespaces:
+        names:
+        - istio-system
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+      action: keep
+      regex: istio-telemetry;http-telemetry-monitoring
+
+# ServiceMonitor for Istio components
+additionalServiceMonitors:
+  - name: "istio-component-monitor"
+    selector:
+      matchLabels:
+        app: istiod
+    namespaceSelector:
+      matchNames:
+        - istio-system
+    endpoints:
+    - port: http-monitoring
+      interval: 15s
+      path: /stats/prometheus

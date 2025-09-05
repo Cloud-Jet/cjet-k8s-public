@@ -1,0 +1,176 @@
+{{- if .Values.istio.virtualService.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Values.istio.virtualService.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  hosts:
+  - {{ .Values.istio.virtualService.apiHost | quote }}
+  - {{ .Values.istio.virtualService.frontendHost | quote }}
+  gateways:
+  - {{ .Values.istio.gateway.name }}
+  http:
+  - match:
+    - uri:
+        prefix: /api/health
+    rewrite:
+      uri: /api/auth/health
+    route:
+    - destination:
+        host: {{ .Values.services.auth.name }}
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigins:
+      - exact: https://www.cloudjet.click
+      - exact: https://cloudjet.click
+      allowMethods:
+      - GET
+      - OPTIONS
+      allowHeaders:
+      - Authorization
+      - Content-Type
+      - X-Requested-With
+      allowCredentials: true
+  - match:
+    - uri:
+        prefix: /api/auth
+    route:
+    - destination:
+        host: {{ .Values.services.auth.name }}
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigins:
+      - exact: https://www.cloudjet.click
+      - exact: https://cloudjet.click
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowHeaders:
+      - Authorization
+      - Content-Type
+      - X-Requested-With
+      allowCredentials: true
+  - match:
+    - uri:
+        prefix: /api/airports
+    rewrite:
+      uri: /api/flights/airports
+    route:
+    - destination:
+        host: {{ .Values.services.flight.name }}
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigins:
+      - exact: https://www.cloudjet.click
+      - exact: https://cloudjet.click
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowHeaders:
+      - Authorization
+      - Content-Type
+      - X-Requested-With
+      allowCredentials: true
+  - match:
+    - uri:
+        prefix: /api/flights
+    route:
+    - destination:
+        host: {{ .Values.services.flight.name }}
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigins:
+      - exact: https://www.cloudjet.click
+      - exact: https://cloudjet.click
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowHeaders:
+      - Authorization
+      - Content-Type
+      - X-Requested-With
+      allowCredentials: true
+  - match:
+    - uri:
+        prefix: /api/bookings
+    route:
+    - destination:
+        host: {{ .Values.services.booking.name }}
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigins:
+      - exact: https://www.cloudjet.click
+      - exact: https://cloudjet.click
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowHeaders:
+      - Authorization
+      - Content-Type
+      - X-Requested-With
+      allowCredentials: true
+  - match:
+    - uri:
+        prefix: /api/payments
+    route:
+    - destination:
+        host: {{ .Values.services.payment.name }}
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigins:
+      - exact: https://www.cloudjet.click
+      - exact: https://cloudjet.click
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowHeaders:
+      - Authorization
+      - Content-Type
+      - X-Requested-With
+      allowCredentials: true
+  - match:
+    - uri:
+        prefix: /api/admin
+    route:
+    - destination:
+        host: {{ .Values.services.admin.name }}.admin.svc.cluster.local
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigins:
+      - exact: https://www.cloudjet.click
+      - exact: https://cloudjet.click
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowHeaders:
+      - Authorization
+      - Content-Type
+      - X-Requested-With
+      allowCredentials: true
+{{- end }}

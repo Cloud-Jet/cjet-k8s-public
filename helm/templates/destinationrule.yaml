@@ -1,0 +1,56 @@
+{{- if .Values.istio.destinationRule.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ .Values.istio.destinationRule.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  host: {{ .Values.services.auth.name }}
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: flight-service-dr
+  namespace: {{ .Values.global.namespace }}
+spec:
+  host: {{ .Values.services.flight.name }}
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: booking-service-dr
+  namespace: {{ .Values.global.namespace }}
+spec:
+  host: {{ .Values.services.booking.name }}
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: payment-service-dr
+  namespace: {{ .Values.global.namespace }}
+spec:
+  host: {{ .Values.services.payment.name }}
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: admin-service-dr
+  namespace: admin
+spec:
+  host: {{ .Values.services.admin.name }}.admin.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+{{- end }}

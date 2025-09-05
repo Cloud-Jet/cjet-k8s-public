@@ -1,0 +1,76 @@
+# Kubernetes secrets and sensitive files
+secrets.yaml
+secrets.yml
+*.secret.yaml
+*.secret.yml
+*-secrets.yaml
+*-secrets.yml
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Helm charts
+charts/
+*.tgz
+
+# Kubectl config
+kubeconfig
+*.kubeconfig
+config
+
+# TLS certificates and keys
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+tls/
+certs/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+.terraform.lock.hcl
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# AWS
+.aws/
+
+# Archive and backup files (exclude old sensitive configs)
+archive/
+backup/
+old/
+
+# Monitoring and observability configs with sensitive data
+*-config.yaml
+*-config.yml
+prometheus-config.yaml
+grafana-config.yaml

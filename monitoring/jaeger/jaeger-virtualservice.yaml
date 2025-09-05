@@ -1,0 +1,30 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: jaeger-vs
+  namespace: monitoring
+spec:
+  hosts:
+  - "jaeger.cloudjet.click"
+  gateways:
+  - user/cloudjet-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: jaeger-query.monitoring.svc.cluster.local
+        port:
+          number: 16686
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: jaeger-dr
+  namespace: monitoring
+spec:
+  host: jaeger-query.monitoring.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE

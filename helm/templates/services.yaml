@@ -1,0 +1,60 @@
+# CloudJet Microservices Services
+{{- range $serviceName, $service := .Values.services }}
+{{- if and $service.enabled (ne $serviceName "admin") }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $service.name }}
+  namespace: {{ $service.namespace | default $.Values.global.namespace }}
+  labels:
+    app: {{ $service.name }}
+    service: {{ $serviceName }}
+spec:
+  selector:
+    app: {{ $service.name }}
+  ports:
+  - port: 80
+    targetPort: {{ $service.port }}
+    protocol: TCP
+  type: ClusterIP
+{{- end }}
+{{- end }}
+
+{{- if .Values.services.admin }}
+---
+# Admin Service in admin namespace
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.admin.name }}
+  namespace: admin
+  labels:
+    app: {{ .Values.services.admin.name }}
+    service: admin
+spec:
+  selector:
+    app: {{ .Values.services.admin.name }}
+  ports:
+  - port: 80
+    targetPort: {{ .Values.services.admin.port }}
+    protocol: TCP
+  type: ClusterIP
+
+---
+# ExternalName Service for admin service cross-namespace access
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.admin.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: admin-service-proxy
+spec:
+  type: ExternalName
+  externalName: {{ .Values.services.admin.name }}.admin.svc.cluster.local
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+{{- end }}
