@@ -52,16 +52,16 @@ graph TD
 └─┬─────────────┬─────────────┬─────────────┬─────────────────┘
   │             │             │             │
 ┌─▼─────┐ ┌─────▼─┐ ┌─────────▼┐ ┌─────────▼┐ ┌──────────────▼┐
-│ Auth  │ │Flight │ │ Booking │ │Payment  │ │    Admin      │
+│ Auth  │ │Flight │ │ Booking │ │ Admin   │ │    Payment    │
 │Service│ │Service│ │ Service │ │Service  │ │   Service     │
 │(5001) │ │(5002) │ │ (5003)  │ │(5004)   │ │   (5005)      │
 └───────┘ └───────┘ └─────────┘ └─────────┘ └───────────────┘
 ```
 
 ### **네임스페이스 구조**
-- `user`: 사용자 대상 서비스 (auth, flight, booking, payment)
-- `admin`: 관리자 서비스 (admin-service)
-- `monitoring`: 모니터링 스택 (Prometheus, Grafana)
+- `user`: 사용자 대상 서비스 (auth, flight, booking)
+- `admin`: 관리자 서비스 (admin-service, payment-service)
+- `monitoring`: 모니터링 스택 (Prometheus, Grafana, Kiali)
 - `istio-system`: Istio 컨트롤 플레인
 
 ---
