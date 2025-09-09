@@ -14,7 +14,7 @@ spec:
         prefix: /
     route:
     - destination:
-        host: prometheus-grafana.monitoring.svc.cluster.local
+        host: prometheus-kube-prometheus-grafana.monitoring.svc.cluster.local
         port:
           number: 3000
     corsPolicy:

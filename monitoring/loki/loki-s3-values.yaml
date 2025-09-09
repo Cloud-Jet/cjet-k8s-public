@@ -1,5 +1,5 @@
-# Loki Stack Values for CloudJet
-# Centralized logging for microservices
+# Loki Stack Values for CloudJet with S3 Storage
+# Centralized logging for microservices using S3 backend
 
 # Loki configuration
 loki:
@@ -18,7 +18,7 @@ loki:
       cpu: "500m"
       memory: "1Gi"
   
-  # Storage configuration (temporary memory, will upgrade later)
+  # Storage configuration using S3
   config:
     auth_enabled: false
     
@@ -27,11 +27,12 @@ loki:
       grpc_listen_port: 9096
     
     common:
-      path_prefix: /var/loki
+      path_prefix: /tmp/loki
       storage:
-        filesystem:
-          chunks_directory: /var/loki/chunks
-          rules_directory: /var/loki/rules
+        s3:
+          bucketnames: cloudjet-loki-storage-eksd-27b9e47b
+          region: ap-northeast-2
+          s3forcepathstyle: false
       replication_factor: 1
       ring:
         kvstore:
@@ -44,16 +45,16 @@ loki:
       configs:
         - from: 2020-10-24
           store: boltdb-shipper
-          object_store: filesystem
+          object_store: s3
           schema: v11
           index:
-            prefix: index_
+            prefix: cloudjet-loki-index
             period: 24h
     
-    # Retention policy (keep logs for 7 days)
+    # Retention policy (keep logs for 7 days in Loki, then S3 Lifecycle takes over)
     limits_config:
       retention_period: 168h  # 7 days
-      max_query_length: 721h  # ~30 days
+      max_query_length: 168h  # 7 days (match retention period)
       max_query_parallelism: 32
       max_streams_per_user: 10000
       max_line_size: 256000
@@ -61,16 +62,25 @@ loki:
     chunk_store_config:
       max_look_back_period: 168h
     
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /tmp/loki/boltdb-shipper-active
+        cache_location: /tmp/loki/boltdb-shipper-cache
+        shared_store: s3
+      aws:
+        bucketnames: cloudjet-loki-storage-eksd-27b9e47b
+        region: ap-northeast-2
+        s3forcepathstyle: false
+    
     table_manager:
-      retention_deletes_enabled: true
-      retention_period: 168h
+      retention_deletes_enabled: false  # S3 Lifecycle handles this
 
   # Service configuration
   service:
     type: ClusterIP
     port: 3100
 
-# Promtail configuration (log collector)
+# Promtail configuration (log collector) - Focus on CloudJet services only
 promtail:
   enabled: true
   
@@ -87,7 +97,7 @@ promtail:
       cpu: "200m"
       memory: "256Mi"
   
-  # Promtail configuration
+  # Promtail configuration - Only collect CloudJet service logs
   config:
     server:
       http_listen_port: 3101
@@ -97,19 +107,22 @@ promtail:
       filename: /run/promtail/positions.yaml
     
     clients:
-      - url: http://loki:3100/loki/api/v1/push
+      - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
     
     scrape_configs:
-      # Kubernetes pod logs
-      - job_name: kubernetes-pods
+      # CloudJet services in user namespace
+      - job_name: cloudjet-user-services
         kubernetes_sd_configs:
           - role: pod
+            namespaces:
+              names:
+                - user
         pipeline_stages:
           - docker: {}
         relabel_configs:
-          # Only scrape pods that have a name label
-          - source_labels: [__meta_kubernetes_pod_name]
-            regex: .+
+          # Only scrape CloudJet service pods
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: (auth-service|flight-service|booking-service|payment-service)
             action: keep
           # Add namespace label
           - source_labels: [__meta_kubernetes_namespace]
@@ -120,11 +133,35 @@ promtail:
           # Add container name label
           - source_labels: [__meta_kubernetes_pod_container_name]
             target_label: container
-          # Add app label if exists
+          # Add service label
           - source_labels: [__meta_kubernetes_pod_label_app]
-            target_label: app
-          # Add service label if exists
-          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            target_label: service
+
+      # CloudJet admin service in admin namespace  
+      - job_name: cloudjet-admin-service
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - admin
+        pipeline_stages:
+          - docker: {}
+        relabel_configs:
+          # Only scrape admin service pods
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: admin-service
+            action: keep
+          # Add namespace label
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          # Add pod name label
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          # Add container name label
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          # Add service label
+          - source_labels: [__meta_kubernetes_pod_label_app]
             target_label: service
 
 # Grafana integration (if grafana is installed)
