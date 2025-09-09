@@ -168,8 +168,8 @@ kubectl label namespace cloudjet istio-injection=enabled
 ### **3. Helm을 사용한 배포**
 ```bash
 # 레포지토리 클론
-git clone https://github.com/Cloud-Jet/cjet-k8s.git
-cd cjet-k8s
+git clone https://github.com/Cloud-Jet/cjet-k8s-public.git
+cd cjet-k8s-public
 
 # Helm 배포
 helm install cloudjet ./helm -n cloudjet
@@ -183,7 +183,7 @@ helm install cloudjet ./helm -n cloudjet \
 ### **4. ArgoCD Application 생성**
 ```bash
 argocd app create cloudjet-app \
-  --repo https://github.com/Cloud-Jet/cjet-k8s.git \
+  --repo https://github.com/Cloud-Jet/cjet-k8s-public.git \
   --path helm \
   --dest-server https://kubernetes.default.svc \
   --dest-namespace cloudjet \
@@ -510,9 +510,9 @@ kubectl rollout undo deployment/auth-service -n cloudjet
 
 ## 📞 **지원**
 
-- **GitHub Issues**: [cjet-k8s Issues](https://github.com/Cloud-Jet/cjet-k8s/issues)
-- **Wiki**: [프로젝트 위키](https://github.com/Cloud-Jet/cjet-k8s/wiki)
-- **관련 프로젝트**: [cjet-backend](https://github.com/Cloud-Jet/cjet-backend)
+- **GitHub Issues**: [cjet-k8s Issues](https://github.com/Cloud-Jet/cjet-k8s-public/issues)
+- **Wiki**: [프로젝트 위키](https://github.com/Cloud-Jet/cjet-k8s-public/wiki)
+- **관련 프로젝트**: [cjet-backend](https://github.com/Cloud-Jet/cjet-backend-public)
 
 ---
 
