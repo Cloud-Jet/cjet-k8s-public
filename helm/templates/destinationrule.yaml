@@ -63,4 +63,8 @@ spec:
       simple: ROUND_ROBIN
     tls:
       mode: ISTIO_MUTUAL
+<<<<<<< HEAD
 {{- end }}
+=======
+{{- end }}
+>>>>>>> f0792a2 (0910 version2)

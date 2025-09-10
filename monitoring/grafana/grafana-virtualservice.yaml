@@ -14,7 +14,7 @@ spec:
         prefix: /
     route:
     - destination:
-        host: prometheus-kube-prometheus-grafana.monitoring.svc.cluster.local
+        host: prometheus-grafana.monitoring.svc.cluster.local
         port:
           number: 3000
     corsPolicy:
@@ -31,4 +31,15 @@ spec:
       - Content-Type
       - X-Requested-With
       allowCredentials: true
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: grafana-dr
+  namespace: monitoring
+spec:
+  host: prometheus-grafana.monitoring.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
 # Gateway is managed in helm/templates/gateway.yaml

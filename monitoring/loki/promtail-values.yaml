@@ -1,0 +1,78 @@
+# Promtail configuration for CloudJet
+config:
+  server:
+    http_listen_port: 3101
+    grpc_listen_port: 0
+  
+  positions:
+    filename: /run/promtail/positions.yaml
+  
+  clients:
+    - url: http://loki.monitoring:3100/loki/api/v1/push
+  
+  scrape_configs:
+    # CloudJet services in user namespace
+    - job_name: cloudjet-user-services
+      kubernetes_sd_configs:
+        - role: pod
+          namespaces:
+            names: [user]
+      pipeline_stages:
+        - docker: {}
+      relabel_configs:
+        # Only scrape CloudJet service pods
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          regex: (auth-service|flight-service|booking-service|payment-service|traffic-generator)
+          action: keep
+        # Add namespace label
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        # Add pod name label
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
+        # Add container name label
+        - source_labels: [__meta_kubernetes_pod_container_name]
+          target_label: container
+        # Add service label
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          target_label: service
+
+    # CloudJet admin service
+    - job_name: cloudjet-admin-service
+      kubernetes_sd_configs:
+        - role: pod
+          namespaces:
+            names: [admin]
+      pipeline_stages:
+        - docker: {}
+      relabel_configs:
+        # Only scrape admin service pods
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          regex: admin-service
+          action: keep
+        # Add namespace label
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        # Add pod name label
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
+        # Add container name label
+        - source_labels: [__meta_kubernetes_pod_container_name]
+          target_label: container
+        # Add service label
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          target_label: service
+
+# Resources
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+  limits:
+    cpu: "200m"
+    memory: "256Mi"
+
+# Service account
+serviceAccount:
+  create: true
+  name: promtail

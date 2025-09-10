@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: traffic-generator
+  namespace: user
   labels:
     app: traffic-generator
     version: v1
@@ -26,11 +27,11 @@ spec:
           - |
             while true; do
               echo "Generating traffic..."
-              curl -s http://auth-service.user:8080/health || echo "Auth service not reachable"
-              curl -s http://booking-service.user:8080/health || echo "Booking service not reachable"
-              curl -s http://flight-service.user:8080/health || echo "Flight service not reachable"
-              curl -s http://payment-service.user:8080/health || echo "Payment service not reachable"
-              curl -s http://admin-service.admin:8080/health || echo "Admin service not reachable"
+              curl -s http://auth-service.user/api/auth/health || echo "Auth service not reachable"
+              curl -s http://booking-service.user/api/bookings/health || echo "Booking service not reachable"
+              curl -s http://flight-service.user/api/flights/health || echo "Flight service not reachable"
+              curl -s http://payment-service.user/api/payments/health || echo "Payment service not reachable"
+              curl -s http://admin-service.admin/api/admin/health || echo "Admin service not reachable"
               sleep 5
             done
         resources:
@@ -45,6 +46,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: traffic-generator
+  namespace: user
   labels:
     app: traffic-generator
 spec:
