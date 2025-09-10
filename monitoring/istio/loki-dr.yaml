@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: loki-dr
+  namespace: monitoring
+spec:
+  host: loki.monitoring.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
