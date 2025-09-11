@@ -6,6 +6,8 @@
 [![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-blue)](https://argoproj.github.io/argo-cd/)
 [![Helm](https://img.shields.io/badge/Helm-v3-326CE5)](https://helm.sh/)
 [![Istio](https://img.shields.io/badge/Istio-Service%20Mesh-466BB0)](https://istio.io/)
+[![AWS EKS](https://img.shields.io/badge/AWS-EKS-FF9900)](https://aws.amazon.com/eks/)
+[![KEDA](https://img.shields.io/badge/KEDA-Auto%20Scaling-0079C1)](https://keda.sh/)
 
 ---
 
@@ -18,8 +20,10 @@ Helm 차트와 ArgoCD를 통해 완전 자동화된 GitOps 워크플로우를 �
 - 🔄 **완전 자동화**: 코드 변경 시 자동 배포
 - ☸️ **Kubernetes Native**: Cloud Native 배포 전략
 - 🛡️ **Istio 서비스 메시**: 트래픽 관리 및 보안
-- 📊 **모니터링 통합**: Prometheus, Grafana 연동
+- 📊 **모니터링 통합**: Prometheus, Grafana, Kiali 연동
 - 🔒 **보안**: External Secrets, RBAC, Network Policies
+- ⚡ **자동 스케일링**: KEDA 기반 이벤트 드리븐 오토스케일링
+- 🌍 **멀티 환경**: 개발/스테이징/운영 환경 자동 구성
 
 ---
 
@@ -70,18 +74,24 @@ graph TD
 
 ```
 helm/
-├── Chart.yaml              # Helm 차트 메타데이터
-├── values.yaml              # 기본 설정 값
+├── Chart.yaml                    # Helm 차트 메타데이터
+├── values.yaml                   # 기본 설정 값
+├── values-dev.yaml               # 개발 환경 설정
+├── values-prod.yaml              # 운영 환경 설정
 ├── templates/
-│   ├── deployments.yaml     # 마이크로서비스 배포
-│   ├── services.yaml        # 서비스 정의
-│   ├── configmap.yaml       # 설정 맵
-│   ├── external-secrets.yaml # AWS Secrets Manager 연동
-│   ├── serviceaccounts.yaml # 서비스 계정
-│   ├── namespace.yaml       # 네임스페이스 생성
-│   ├── gateway.yaml         # Istio Gateway
-│   ├── virtualservice.yaml  # Istio Virtual Service
-│   └── destinationrule.yaml # Istio Destination Rules
+│   ├── deployments.yaml         # 마이크로서비스 배포
+│   ├── services.yaml            # 서비스 정의
+│   ├── configmap.yaml           # 설정 맵
+│   ├── external-secrets.yaml    # AWS Secrets Manager 연동
+│   ├── serviceaccounts.yaml     # 서비스 계정
+│   ├── namespace.yaml           # 네임스페이스 생성
+│   ├── gateway.yaml             # Istio Gateway
+│   ├── virtualservice.yaml      # Istio Virtual Service
+│   ├── destinationrule.yaml     # Istio Destination Rules
+│   ├── admin-namespace-mtls.yaml # mTLS 정책
+│   ├── keda-scaledobject.yaml   # KEDA 오토스케일링
+│   ├── istio-gateway-service.yaml # 게이트웨이 서비스
+│   └── servicemonitor.yaml      # Prometheus 모니터링
 └── .helmignore
 ```
 
@@ -295,6 +305,53 @@ spec:
 
 ---
 
+## ⚡ **자동 스케일링 (KEDA)**
+
+### **KEDA ScaledObject 설정**
+```yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: auth-service-scaler
+spec:
+  scaleTargetRef:
+    name: auth-service
+  minReplicaCount: 2
+  maxReplicaCount: 10
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus:9090
+      metricName: http_requests_per_second
+      threshold: '30'
+      query: sum(rate(http_requests_total{job="auth-service"}[1m]))
+```
+
+### **지원되는 스케일링 트리거**
+- **Prometheus 메트릭**: CPU, 메모리, 사용자 정의 메트릭
+- **HTTP 요청량**: 요청 처리량 기반 스케일링
+- **Redis Queue**: 메시지 큐 길이 기반
+- **AWS CloudWatch**: AWS 네이티브 메트릭 연동
+
+### **스케일링 정책**
+```yaml
+behavior:
+  scaleDown:
+    stabilizationWindowSeconds: 300
+    policies:
+    - type: Percent
+      value: 10
+      periodSeconds: 60
+  scaleUp:
+    stabilizationWindowSeconds: 0
+    policies:
+    - type: Percent
+      value: 100
+      periodSeconds: 15
+```
+
+---
+
 ## 📊 **모니터링**
 
 ### **Prometheus 연동**
@@ -318,6 +375,8 @@ spec:
 - **애플리케이션 메트릭**: CPU, 메모리, 응답 시간
 - **비즈니스 메트릭**: 예약 수, 결제 성공률, 사용자 활동
 - **Istio 메트릭**: 트래픽, 에러율, 레이턴시
+- **KEDA 메트릭**: 스케일링 이벤트, 파드 수 변화
+- **AWS EKS 메트릭**: 노드 상태, 클러스터 리소스
 
 ### **알람 설정**
 ```yaml
@@ -478,9 +537,11 @@ kubectl rollout undo deployment/auth-service -n cloudjet
 ### **배포 전 확인사항**
 - [ ] Kubernetes 클러스터 접근 가능
 - [ ] Istio 설치 및 구성 완료
+- [ ] KEDA 오퍼레이터 설치
 - [ ] AWS Secrets Manager 설정
 - [ ] ECR 레지스트리 접근 권한
 - [ ] 네임스페이스 생성 및 라벨링
+- [ ] External Secrets Operator 설치
 
 ### **배포 후 확인사항**
 - [ ] 모든 파드 Running 상태
@@ -488,6 +549,8 @@ kubectl rollout undo deployment/auth-service -n cloudjet
 - [ ] 외부 접근 가능 여부
 - [ ] Health Check 정상 동작
 - [ ] 모니터링 메트릭 수집
+- [ ] KEDA 스케일링 동작 확인
+- [ ] Istio mTLS 적용 확인
 
 ---
 
