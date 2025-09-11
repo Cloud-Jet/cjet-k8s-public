@@ -14,7 +14,7 @@ services:
     name: auth-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-auth-svc
-      tag: v5.0.0
+      tag: v1.0.0
     port: 5001
     replicas: 2
     resources:
@@ -30,7 +30,7 @@ services:
     name: flight-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-flight-svc
-      tag: v10.0.0
+      tag: v1.0.0
     port: 5002
     replicas: 2
     resources:
@@ -46,7 +46,7 @@ services:
     name: booking-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-booking-svc
-      tag: v10.0.0
+      tag: v1.0.0
     port: 5003
     replicas: 2
     resources:
@@ -62,7 +62,7 @@ services:
     name: payment-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-payment-svc
-      tag: v10.0.0
+      tag: v1.0.0
     port: 5005
     replicas: 1
     resources:
@@ -78,7 +78,7 @@ services:
     name: admin-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-admin-svc
-      tag: v10.0.0
+      tag: v1.0.0
     port: 5004
     namespace: admin  # Admin service goes to admin namespace
     replicas: 1
