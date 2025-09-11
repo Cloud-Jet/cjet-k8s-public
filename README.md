@@ -62,11 +62,12 @@ graph TD
 └───────┘ └───────┘ └─────────┘ └─────────┘ └───────────────┘
 ```
 
-### **네임스페이스 구조**
+### **실제 네임스페이스 구조**
 - `user`: 사용자 대상 서비스 (auth, flight, booking)
-- `admin`: 관리자 서비스 (admin-service, payment-service)
-- `monitoring`: 모니터링 스택 (Prometheus, Grafana, Kiali)
+- `admin`: 관리자 서비스 (admin-service, payment-service)  
+- `monitoring`: 완전한 관측성 스택 (Prometheus, Grafana, Kiali, Jaeger, Loki)
 - `istio-system`: Istio 컨트롤 플레인
+- `keda`: KEDA 오토스케일링 오퍼레이터
 
 ---
 
@@ -99,7 +100,7 @@ helm/
 
 ## ⚙️ **values.yaml 구성**
 
-### **글로벌 설정**
+### **실제 구현된 values.yaml 설정**
 ```yaml
 global:
   namespace: user
@@ -111,28 +112,38 @@ services:
     name: auth-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-auth-svc
-      tag: latest
+      tag: v5.0.0
     port: 5001
     replicas: 2
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
     
-  flight:
-    name: flight-service
-    image:
-      repository: public.ecr.aws/v3g6g4v7/cj-flight-svc
-      tag: latest
-    port: 5002
-    replicas: 2
+  admin:
+    name: admin-service
+    namespace: admin  # Admin 전용 네임스페이스
+    replicas: 1
 ```
 
-### **보안 설정**
+### **실제 보안 설정**
 ```yaml
+# ServiceAccount with IAM Role 연동
+serviceAccounts:
+  accounts:
+    - name: cloudjet-secrets-sa
+      roleArn: arn:aws:iam::556683426101:role/CloudJetSecretsRole
+      namespaces: ["user", "admin"]
+
+# External Secrets 설정
 secrets:
   externalSecrets:
     enabled: true
+    storeName: aws-secrets-store
     serviceAccountName: cloudjet-secrets-sa
-    secretStore:
-      name: aws-secrets-store
-      region: ap-northeast-2
 ```
 
 ### **Istio 설정**
@@ -371,12 +382,33 @@ spec:
     path: /metrics
 ```
 
-### **Grafana 대시보드**
-- **애플리케이션 메트릭**: CPU, 메모리, 응답 시간
-- **비즈니스 메트릭**: 예약 수, 결제 성공률, 사용자 활동
-- **Istio 메트릭**: 트래픽, 에러율, 레이턴시
-- **KEDA 메트릭**: 스케일링 이벤트, 파드 수 변화
-- **AWS EKS 메트릭**: 노드 상태, 클러스터 리소스
+### **완전한 모니터링 스택**
+
+#### **Prometheus (메트릭 수집)**
+- **스토리지**: 20GB gp2 볼륨, 15일 보존
+- **수집 대상**: Istio, Kubernetes, 애플리케이션 메트릭
+- **리소스**: 1-2GB 메모리, 0.5-1 CPU
+
+#### **Grafana (시각화)**
+- **데이터소스**: Prometheus, Loki 연동
+- **대시보드**: 애플리케이션, 비즈니스, Istio 메트릭
+- **스토리지**: 10GB 지속적 볼륨
+- **접근**: grafana.cloudjet.click
+
+#### **Kiali (서비스 메시 관측성)**
+- **기능**: 서비스 토폴로지, 트래픽 플로우 시각화
+- **연동**: Prometheus, Grafana, Jaeger 통합
+- **접근**: kiali.cloudjet.click
+
+#### **Jaeger (분산 추적)**
+- **설정**: All-in-One 배포, 메모리 스토리지
+- **용량**: 최대 50,000 traces
+- **접근**: jaeger.cloudjet.click
+
+#### **Loki (로그 집계)**
+- **백엔드**: AWS S3 (cloudjet-loki-storage)
+- **보존**: 7일 로그 보관
+- **IAM**: loki-irsa-role 서비스 계정
 
 ### **알람 설정**
 ```yaml
