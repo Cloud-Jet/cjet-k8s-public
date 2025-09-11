@@ -78,7 +78,7 @@ services:
     name: admin-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-admin-svc
-      tag: v10.0.0
+      tag: v1.0.0
     port: 5004
     namespace: admin  # Admin service goes to admin namespace
     replicas: 1
