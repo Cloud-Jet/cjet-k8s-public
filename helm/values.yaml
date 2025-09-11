@@ -46,7 +46,7 @@ services:
     name: booking-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-booking-svc
-      tag: v1.0.0
+      tag: v2.0.1
     port: 5003
     replicas: 2
     resources:
