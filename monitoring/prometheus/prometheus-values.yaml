@@ -50,6 +50,12 @@ grafana:
     url: http://loki:3100
     access: proxy
     isDefault: false
+    jsonData:
+      httpMethod: GET
+      maxLines: 1000
+    customQueryParameters: ""
+    customHttpHeaders: {}
+    editable: true
   
   # Storage
   persistence:

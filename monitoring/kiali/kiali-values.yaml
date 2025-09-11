@@ -38,10 +38,10 @@ external_services:
   istio:
     root_namespace: "istio-system"
   prometheus:
-    url: "http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090"
+    url: "http://prometheus-prometheus.monitoring.svc.cluster.local:9090"
   grafana:
     enabled: true
-    in_cluster_url: "http://prometheus-kube-prometheus-grafana.monitoring.svc.cluster.local:3000"
+    in_cluster_url: "http://prometheus-grafana.monitoring.svc.cluster.local:3000"
     url: "https://grafana.cloudjet.click"
   jaeger:
     enabled: true

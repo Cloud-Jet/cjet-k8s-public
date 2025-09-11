@@ -1,0 +1,6 @@
+apiVersion: v2
+name: keda-config
+description: KEDA ScaledObject configurations for microservices auto-scaling
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

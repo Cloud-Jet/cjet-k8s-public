@@ -1,0 +1,34 @@
+{{- if .Values.karpenter.enabled }}
+{{- range $name, $nodePool := .Values.karpenter.nodePools }}
+{{- if $nodePool.name }}
+---
+apiVersion: karpenter.sh/v1beta1
+kind: NodePool
+metadata:
+  name: {{ $nodePool.name }}
+spec:
+  template:
+    spec:
+      requirements:
+      {{- range $nodePool.requirements }}
+      - key: {{ .key }}
+        operator: {{ .operator }}
+        values:
+        {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      nodeClassRef:
+        apiVersion: karpenter.k8s.aws/v1beta1
+        kind: EC2NodeClass
+        name: {{ $nodePool.nodeClassRef }}
+      taints: []
+  limits:
+    cpu: {{ $nodePool.limits.cpu | default "50" }}
+    memory: {{ $nodePool.limits.memory | default "100Gi" }}
+  disruption:
+    consolidationPolicy: {{ $nodePool.disruption.consolidationPolicy | default "WhenUnderutilized" }}
+    expireAfter: {{ $nodePool.disruption.expireAfter | default "5m" }}
+{{- end }}
+{{- end }}
+{{- end }}

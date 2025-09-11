@@ -14,7 +14,8 @@ spec:
   selector:
     app: {{ $service.name }}
   ports:
-  - port: 80
+  - name: http
+    port: 80
     targetPort: {{ $service.port }}
     protocol: TCP
   type: ClusterIP
@@ -36,7 +37,8 @@ spec:
   selector:
     app: {{ .Values.services.admin.name }}
   ports:
-  - port: 80
+  - name: http
+    port: 80
     targetPort: {{ .Values.services.admin.port }}
     protocol: TCP
   type: ClusterIP
@@ -54,7 +56,8 @@ spec:
   type: ExternalName
   externalName: {{ .Values.services.admin.name }}.admin.svc.cluster.local
   ports:
-  - port: 80
+  - name: http
+    port: 80
     targetPort: 80
     protocol: TCP
 {{- end }}

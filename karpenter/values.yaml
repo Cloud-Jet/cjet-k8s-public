@@ -1,0 +1,40 @@
+global:
+  clusterName: "eksdapne2-vazh"
+
+karpenter:
+  enabled: true
+  
+  nodeClasses:
+    default:
+      name: "default"
+      instanceStorePolicy: "RAID0"
+      amiFamily: "AL2023"
+      role: "eks-eksdapne2-vazh-ng"
+      metadataOptions:
+        httpEndpoint: "enabled"
+        httpProtocolIPv6: "disabled"
+        httpPutResponseHopLimit: 1
+        httpTokens: "required"
+
+  nodePools:
+    default:
+      name: "default"
+      nodeClassRef: "default"
+      requirements:
+        - key: "kubernetes.io/arch"
+          operator: "In"
+          values: ["amd64"]
+        - key: "karpenter.sh/capacity-type"
+          operator: "In" 
+          values: ["spot"]
+        - key: "node.kubernetes.io/instance-type"
+          operator: "In"
+          values: ["t3.large", "t3.xlarge", "t3.2xlarge"]
+      limits:
+        cpu: "50"
+        memory: "100Gi"
+      disruption:
+        consolidationPolicy: "WhenUnderutilized"
+        expireAfter: "5m"
+      minReplicas: 1
+      maxReplicas: 10

@@ -1,0 +1,100 @@
+global:
+  namespace: "user"  # 기존 values.yaml과 일치
+
+keda:
+  enabled: true
+  prometheus:
+    serverAddress: "http://prometheus-prometheus.monitoring.svc.cluster.local:9090"
+
+  scaledObjects:
+    # Auth Service - 로그인 버스트 대응
+    auth-service:
+      enabled: true
+      name: "auth-service"
+      namespace: "user"
+      targetDeployment: "auth-service"
+      minReplicas: 2
+      maxReplicas: 8
+      pollingInterval: 15
+      cooldownPeriod: 180
+      triggers:
+        - type: "prometheus"
+          metricName: "auth_service_rps"
+          query: 'rate(istio_requests_total{destination_service_name="auth-service"}[1m])'
+          threshold: "15"
+
+    # Flight Service - 검색 트래픽 변동 대응  
+    flight-service:
+      enabled: true
+      name: "flight-service"
+      namespace: "user"
+      targetDeployment: "flight-service"
+      minReplicas: 2
+      maxReplicas: 12
+      pollingInterval: 20
+      cooldownPeriod: 240
+      triggers:
+        - type: "prometheus"
+          metricName: "flight_service_rps"
+          query: 'rate(istio_requests_total{destination_service_name="flight-service"}[1m])'
+          threshold: "10"
+        - type: "prometheus"
+          metricName: "flight_service_latency"
+          query: 'histogram_quantile(0.95, rate(istio_request_duration_milliseconds_bucket{destination_service_name="flight-service"}[1m]))'
+          threshold: "800"
+
+    # Booking Service - 예약 처리 시간 중요
+    booking-service:
+      enabled: true
+      name: "booking-service"
+      namespace: "user"
+      targetDeployment: "booking-service"
+      minReplicas: 2
+      maxReplicas: 15
+      pollingInterval: 20
+      cooldownPeriod: 300
+      triggers:
+        - type: "prometheus"
+          metricName: "booking_service_rps"
+          query: 'rate(istio_requests_total{destination_service_name="booking-service"}[1m])'
+          threshold: "8"
+        - type: "prometheus"
+          metricName: "booking_service_latency"
+          query: 'histogram_quantile(0.95, rate(istio_request_duration_milliseconds_bucket{destination_service_name="booking-service"}[1m]))'
+          threshold: "1000"
+
+    # Payment Service - 결제 안정성 중요 (에러율 우선)
+    payment-service:
+      enabled: true
+      name: "payment-service"
+      namespace: "user"
+      targetDeployment: "payment-service"
+      minReplicas: 1
+      maxReplicas: 6
+      pollingInterval: 15
+      cooldownPeriod: 300
+      triggers:
+        - type: "prometheus"
+          metricName: "payment_service_error_rate"
+          query: 'rate(istio_requests_total{destination_service_name="payment-service",response_code!~"2.."}[1m]) / rate(istio_requests_total{destination_service_name="payment-service"}[1m]) * 100'
+          threshold: "3"
+        - type: "prometheus"
+          metricName: "payment_service_rps"
+          query: 'rate(istio_requests_total{destination_service_name="payment-service"}[1m])'
+          threshold: "5"
+
+    # Admin Service - 관리 기능 (안정적 운영)
+    admin-service:
+      enabled: true
+      name: "admin-service"
+      namespace: "admin"
+      targetDeployment: "admin-service"
+      minReplicas: 1
+      maxReplicas: 4
+      pollingInterval: 60
+      cooldownPeriod: 600
+      triggers:
+        - type: "prometheus"
+          metricName: "admin_service_rps"
+          query: 'rate(istio_requests_total{destination_service_name="admin-service"}[1m])'
+          threshold: "5"
