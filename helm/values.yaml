@@ -14,9 +14,15 @@ services:
     name: auth-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-auth-svc
-      tag: v2.0.1
+      tag: v1.0.0
     port: 5001
     replicas: 2
+    rollout:
+      enabled: true
+      autoPromotion: true
+      analysis:
+        enabled: true
+        performance: false
     resources:
       requests:
         memory: "256Mi"
@@ -30,9 +36,15 @@ services:
     name: flight-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-flight-svc
-      tag: v2.0.2
+      tag: v1.0.0
     port: 5002
     replicas: 2
+    rollout:
+      enabled: true
+      autoPromotion: true
+      analysis:
+        enabled: true
+        performance: false
     resources:
       requests:
         memory: "256Mi"
@@ -46,9 +58,15 @@ services:
     name: booking-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-booking-svc
-      tag: v2.0.2
+      tag: v2.0.3
     port: 5003
     replicas: 2
+    rollout:
+      enabled: true
+      autoPromotion: true
+      analysis:
+        enabled: true
+        performance: false
     resources:
       requests:
         memory: "256Mi"
@@ -62,9 +80,15 @@ services:
     name: payment-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-payment-svc
-      tag: v2.0.2
+      tag: v2.0.3
     port: 5005
     replicas: 1
+    rollout:
+      enabled: true
+      autoPromotion: true
+      analysis:
+        enabled: true
+        performance: false
     resources:
       requests:
         memory: "256Mi"
@@ -78,10 +102,16 @@ services:
     name: admin-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-admin-svc
-      tag: v2.0.2
+      tag: v2.0.3
     port: 5004
     namespace: admin  # Admin service goes to admin namespace
     replicas: 1
+    rollout:
+      enabled: true
+      autoPromotion: true
+      analysis:
+        enabled: true
+        performance: false
     resources:
       requests:
         memory: "256Mi"

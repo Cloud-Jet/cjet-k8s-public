@@ -1,0 +1,45 @@
+# CloudJet Rollout Services (Active/Preview for Blue-Green)
+{{- range $serviceName, $service := .Values.services }}
+{{- if and $service.enabled (hasKey $service "rollout") $service.rollout.enabled }}
+---
+# Active Service (Production Traffic)
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $service.name }}-active
+  namespace: {{ $service.namespace | default $.Values.global.namespace }}
+  labels:
+    app: {{ $service.name }}
+    service: {{ $serviceName }}
+    type: active
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ $service.port }}
+    targetPort: {{ $service.port }}
+    protocol: TCP
+    name: http
+  selector:
+    app: {{ $service.name }}
+---
+# Preview Service (Test Traffic)
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $service.name }}-preview
+  namespace: {{ $service.namespace | default $.Values.global.namespace }}
+  labels:
+    app: {{ $service.name }}
+    service: {{ $serviceName }}
+    type: preview
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ $service.port }}
+    targetPort: {{ $service.port }}
+    protocol: TCP
+    name: http
+  selector:
+    app: {{ $service.name }}
+{{- end }}
+{{- end }}
