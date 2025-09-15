@@ -5,14 +5,12 @@
 fullnameOverride: "jaeger"
 namespaceOverride: "monitoring"
 
-# All-in-One configuration
-allInOne:
+# Distributed Jaeger configuration
+agent:
   enabled: true
-  image:
-    registry: ""
-    repository: jaegertracing/all-in-one
-    tag: "1.50"
-    pullPolicy: IfNotPresent
+
+collector:
+  enabled: true
   resources:
     requests:
       cpu: "200m"
@@ -20,21 +18,21 @@ allInOne:
     limits:
       cpu: "1000m"
       memory: "2Gi"
-  
-  # Storage configuration - use memory storage for simplicity
-  args:
-    - --memory.max-traces=50000
-    - --log-level=info
-
-# Disable other components when using all-in-one
-agent:
-  enabled: false
-
-collector:
-  enabled: false
+  extraEnv:
+    - name: COLLECTOR_ZIPKIN_HOST_PORT
+      value: ":9411"
 
 query:
-  enabled: false
+  enabled: true
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+  service:
+    type: ClusterIP
 
 storage:
   type: memory
@@ -55,6 +53,12 @@ service:
     - name: zipkin
       port: 9411
       targetPort: 9411
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
 
 # Ingress configuration (if needed)
 ingress:

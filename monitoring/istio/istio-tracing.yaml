@@ -1,0 +1,17 @@
+# Istio Operator Configuration for CloudJet
+# Configures OpenTelemetry tracing with Jaeger
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: cloudjet-tracing
+  namespace: istio-system
+spec:
+  meshConfig:
+    enableTracing: true
+    defaultConfig:
+      tracing: {}   # disable legacy MeshConfig tracing options
+    extensionProviders:
+    - name: jaeger
+      opentelemetry:
+        service: jaeger-collector.monitoring.svc.cluster.local
+        port: 4317

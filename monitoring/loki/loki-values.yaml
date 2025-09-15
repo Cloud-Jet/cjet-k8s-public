@@ -29,6 +29,18 @@ serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::556683426101:role/loki-irsa-role
 
+write:
+  replicas: 2
+
+read:
+  replicas: 2
+
+backend:
+  replicas: 2
+
+chunksCache:
+  enabled: false
+
 monitoring:
   serviceMonitor:
     enabled: true

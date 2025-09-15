@@ -1,0 +1,16 @@
+# Istio Telemetry Configuration for CloudJet
+# Enables distributed tracing for all services in the mesh
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: mesh-default
+  namespace: istio-system
+  labels:
+    app: istio
+    component: telemetry
+spec:
+  # Enable tracing for all workloads in the mesh
+  tracing:
+  - providers:
+    - name: jaeger
+    randomSamplingPercentage: 100.0  # 100% for testing, use 1.0 for production
