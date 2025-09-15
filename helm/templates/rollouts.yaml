@@ -1,11 +1,11 @@
-# CloudJet Microservices Deployments
+# CloudJet Microservices Rollouts (Blue-Green Deployment)
 {{- range $serviceName, $service := .Values.services }}
-{{- if and $service.enabled (not (and (hasKey $service "rollout") $service.rollout.enabled)) }}
+{{- if and $service.enabled (hasKey $service "rollout") $service.rollout.enabled }}
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
-  name: {{ $service.name }}
+  name: {{ $service.name }}-rollout
   namespace: {{ $service.namespace | default $.Values.global.namespace }}
   labels:
     app: {{ $service.name }}
@@ -33,14 +33,14 @@ spec:
         imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ $service.port }}
-        
+
         # Environment variables from ConfigMap and Secret
         envFrom:
         - configMapRef:
             name: cloudjet-config
         - secretRef:
             name: cloudjet-secrets
-        
+
         # Health checks
         livenessProbe:
           httpGet:
@@ -58,6 +58,7 @@ spec:
             port: {{ $service.port }}
           initialDelaySeconds: 30
           periodSeconds: 10
+          failureThreshold: 3
         readinessProbe:
           httpGet:
             {{- if eq $serviceName "auth" }}
@@ -74,9 +75,36 @@ spec:
             port: {{ $service.port }}
           initialDelaySeconds: 5
           periodSeconds: 5
-        
+          failureThreshold: 3
+
         # Resource limits
         resources:
           {{- toYaml $service.resources | nindent 10 }}
+
+  # Blue-Green Deployment Strategy
+  strategy:
+    blueGreen:
+      activeService: {{ $service.name }}-active
+      previewService: {{ $service.name }}-preview
+      autoPromotionEnabled: {{ $service.rollout.autoPromotion | default false }}
+      {{- if $service.rollout.autoPromotionSeconds }}
+      autoPromotionSeconds: {{ $service.rollout.autoPromotionSeconds }}
+      {{- end }}
+      scaleDownDelaySeconds: 30
+      prePromotionAnalysis:
+        {{- if $service.rollout.analysis.enabled }}
+        templates:
+        - templateName: {{ $service.name }}-health-check
+        {{- if $service.rollout.analysis.performance }}
+        - templateName: {{ $service.name }}-performance-check
+        {{- end }}
+        args: []
+        {{- else }}
+        templates: []
+        args: []
+        {{- end }}
+      postPromotionAnalysis:
+        templates: []
+        args: []
 {{- end }}
 {{- end }}
