@@ -19,6 +19,21 @@ config:
             names: [user]
       pipeline_stages:
         - docker: {}
+        # Filter out health check logs
+        - match:
+            selector: '{container="istio-proxy"}'
+            stages:
+              - regex:
+                  expression: '(?P<method>\w+) (?P<path>[^\s]+)'
+              - drop:
+                  expression: '.*/(health|healthz|ready|live).*'
+        - match:
+            selector: '{container!="istio-proxy"}'
+            stages:
+              - regex:
+                  expression: '.*"(?P<method>\w+) (?P<path>[^"]*)".*'
+              - drop:
+                  expression: '.*/(health|healthz|ready|live).*'
       relabel_configs:
         # Only scrape CloudJet service pods
         - source_labels: [__meta_kubernetes_pod_label_app]
@@ -45,6 +60,21 @@ config:
             names: [admin]
       pipeline_stages:
         - docker: {}
+        # Filter out health check logs
+        - match:
+            selector: '{container="istio-proxy"}'
+            stages:
+              - regex:
+                  expression: '(?P<method>\w+) (?P<path>[^\s]+)'
+              - drop:
+                  expression: '.*/(health|healthz|ready|live).*'
+        - match:
+            selector: '{container!="istio-proxy"}'
+            stages:
+              - regex:
+                  expression: '.*"(?P<method>\w+) (?P<path>[^"]*)".*'
+              - drop:
+                  expression: '.*/(health|healthz|ready|live).*'
       relabel_configs:
         # Only scrape admin service pods
         - source_labels: [__meta_kubernetes_pod_label_app]
