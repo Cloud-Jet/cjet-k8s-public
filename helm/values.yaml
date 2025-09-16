@@ -21,7 +21,7 @@ services:
       enabled: true
       autoPromotion: true
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
@@ -43,7 +43,7 @@ services:
       enabled: true
       autoPromotion: true
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
@@ -65,7 +65,7 @@ services:
       enabled: true
       autoPromotion: true
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
@@ -87,7 +87,7 @@ services:
       enabled: true
       autoPromotion: true
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
@@ -110,7 +110,7 @@ services:
       enabled: true
       autoPromotion: true
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
