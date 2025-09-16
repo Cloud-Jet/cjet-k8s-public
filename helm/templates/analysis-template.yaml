@@ -15,15 +15,11 @@ spec:
     consecutiveErrorLimit: 15 # 연속 실패 제한도 관대하게
     interval: 30s            # 긴 간격으로 Pod 준비 시간 확보
     count: 20                # 충분한 시도 횟수 (10분간)
-    successCondition: result == "healthy"
+    successCondition: result.code == 200
     provider:
       web:
         # 클러스터 내부 DNS가 아닌 Kubernetes API를 통한 헬스체크
         url: "http://{{ $service.name }}-preview.{{ $service.namespace | default $.Values.global.namespace }}.svc.cluster.local:{{ $service.port }}{{- if eq $serviceName "auth" }}/api/auth/health{{- else if eq $serviceName "booking" }}/api/bookings/health{{- else if eq $serviceName "flight" }}/api/flights/health{{- else if eq $serviceName "payment" }}/api/payments/health{{- else if eq $serviceName "admin" }}/api/admin/health{{- end }}"
-        headers:
-        - key: Content-Type
-          value: application/json
-        jsonPath: "{$.status}"
         timeoutSeconds: 15
 
   - name: response-time-check
@@ -31,7 +27,7 @@ spec:
     consecutiveErrorLimit: 8
     interval: 30s
     count: 12  # failureLimit보다 크게 설정됨
-    successCondition: result < 10000  # 10초 이내 응답 (매우 관대하게)
+    successCondition: result.code == 200  # HTTP 200 응답만 확인
     provider:
       web:
         url: "http://{{ $service.name }}-preview.{{ $service.namespace | default $.Values.global.namespace }}.svc.cluster.local:{{ $service.port }}{{- if eq $serviceName "auth" }}/api/auth/health{{- else if eq $serviceName "booking" }}/api/bookings/health{{- else if eq $serviceName "flight" }}/api/flights/health{{- else if eq $serviceName "payment" }}/api/payments/health{{- else if eq $serviceName "admin" }}/api/admin/health{{- end }}"
