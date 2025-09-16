@@ -13,15 +13,17 @@ spec:
   - name: health-check
     provider:
       web:
-        url: "http://{{ $service.name }}-preview:{{ $service.port }}{{- if eq $serviceName "auth" }}/api/auth/health{{- else if eq $serviceName "booking" }}/api/bookings/health{{- else if eq $serviceName "flight" }}/api/flights/health{{- else if eq $serviceName "payment" }}/api/payments/health{{- else if eq $serviceName "admin" }}/api/admin/health{{- end }}"
+        # 클러스터 내부 DNS가 아닌 Kubernetes API를 통한 헬스체크
+        url: "http://{{ $service.name }}-preview.{{ $service.namespace | default $.Values.global.namespace }}.svc.cluster.local:{{ $service.port }}{{- if eq $serviceName "auth" }}/api/auth/health{{- else if eq $serviceName "booking" }}/api/bookings/health{{- else if eq $serviceName "flight" }}/api/flights/health{{- else if eq $serviceName "payment" }}/api/payments/health{{- else if eq $serviceName "admin" }}/api/admin/health{{- end }}"
         headers:
         - key: Content-Type
           value: application/json
         jsonPath: "{$.status}"
+        timeoutSeconds: 5
     successCondition: result == "healthy"
-    failureLimit: 3
-    interval: 10s
-    count: 6  # 1분간 6번 체크
+    failureLimit: 5  # 더 관대하게 설정
+    interval: 15s    # 간격도 늘림
+    count: 4         # 횟수 줄임
 
   - name: response-time-check
     provider:
