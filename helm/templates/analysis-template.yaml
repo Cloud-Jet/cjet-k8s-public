@@ -1,6 +1,6 @@
 # CloudJet Analysis Templates for Auto-Promotion
 {{- range $serviceName, $service := .Values.services }}
-{{- if and $service.enabled (hasKey $service "rollout") $service.rollout.enabled }}
+{{- if and $service.enabled (hasKey $service "rollout") $service.rollout.enabled $service.rollout.analysis.enabled }}
 ---
 # Health Check Analysis Template
 apiVersion: argoproj.io/v1alpha1
