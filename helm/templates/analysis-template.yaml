@@ -12,6 +12,7 @@ spec:
   metrics:
   - name: health-check
     failureLimit: 15         # 매우 관대한 실패 허용 (Pod 시작 시간 고려)
+    consecutiveErrorLimit: 15 # 연속 실패 제한도 관대하게
     interval: 30s            # 긴 간격으로 Pod 준비 시간 확보
     count: 20                # 충분한 시도 횟수 (10분간)
     successCondition: result == "healthy"
@@ -27,6 +28,7 @@ spec:
 
   - name: response-time-check
     failureLimit: 8
+    consecutiveErrorLimit: 8
     interval: 30s
     count: 12  # failureLimit보다 크게 설정됨
     successCondition: result < 10000  # 10초 이내 응답 (매우 관대하게)
