@@ -20,6 +20,7 @@ services:
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 30
       analysis:
         enabled: false
         performance: false
@@ -42,6 +43,7 @@ services:
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 30
       analysis:
         enabled: false
         performance: false
@@ -64,6 +66,7 @@ services:
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 30
       analysis:
         enabled: false
         performance: false
@@ -86,6 +89,7 @@ services:
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 30
       analysis:
         enabled: false
         performance: false
@@ -109,6 +113,7 @@ services:
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 30
       analysis:
         enabled: false
         performance: false
