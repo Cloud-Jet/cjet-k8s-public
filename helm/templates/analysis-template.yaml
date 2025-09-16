@@ -23,8 +23,8 @@ spec:
         timeoutSeconds: 15
 
   - name: response-time-check
-    failureLimit: 8
-    consecutiveErrorLimit: 8
+    failureLimit: 15
+    consecutiveErrorLimit: 15
     interval: 30s
     count: 12  # failureLimit보다 크게 설정됨
     successCondition: result.code == 200  # HTTP 200 응답만 확인
