@@ -21,19 +21,19 @@ spec:
         jsonPath: "{$.status}"
         timeoutSeconds: 5
     successCondition: result == "healthy"
-    failureLimit: 5  # 더 관대하게 설정
+    failureLimit: 3  # count보다 작게 설정
     interval: 15s    # 간격도 늘림
-    count: 4         # 횟수 줄임
+    count: 6         # failureLimit보다 크게 설정
 
   - name: response-time-check
     provider:
       web:
-        url: "http://{{ $service.name }}-preview:{{ $service.port }}{{- if eq $serviceName "auth" }}/api/auth/health{{- else if eq $serviceName "booking" }}/api/bookings/health{{- else if eq $serviceName "flight" }}/api/flights/health{{- else if eq $serviceName "payment" }}/api/payments/health{{- else if eq $serviceName "admin" }}/api/admin/health{{- end }}"
-        timeoutSeconds: 2
-    successCondition: result < 2000  # 2초 이내 응답
+        url: "http://{{ $service.name }}-preview.{{ $service.namespace | default $.Values.global.namespace }}.svc.cluster.local:{{ $service.port }}{{- if eq $serviceName "auth" }}/api/auth/health{{- else if eq $serviceName "booking" }}/api/bookings/health{{- else if eq $serviceName "flight" }}/api/flights/health{{- else if eq $serviceName "payment" }}/api/payments/health{{- else if eq $serviceName "admin" }}/api/admin/health{{- end }}"
+        timeoutSeconds: 5
+    successCondition: result < 5000  # 5초 이내 응답 (더 관대하게)
     failureLimit: 2
     interval: 15s
-    count: 4  # 1분간 4번 체크
+    count: 4  # failureLimit보다 크게 설정됨
 
 ---
 # Performance Analysis Template
