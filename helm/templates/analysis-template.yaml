@@ -6,7 +6,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
-  name: {{ $service.name }}-health-check
+  name: {{ $service.name }}-health-check-{{ $service.image.tag | replace "." "-" }}
   namespace: {{ $service.namespace | default $.Values.global.namespace }}
 spec:
   metrics:
@@ -38,7 +38,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
-  name: {{ $service.name }}-performance-check
+  name: {{ $service.name }}-performance-check-{{ $service.image.tag | replace "." "-" }}
   namespace: {{ $service.namespace | default $.Values.global.namespace }}
 spec:
   metrics:

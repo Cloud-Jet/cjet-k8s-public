@@ -94,9 +94,9 @@ spec:
       prePromotionAnalysis:
         {{- if $service.rollout.analysis.enabled }}
         templates:
-        - templateName: {{ $service.name }}-health-check
+        - templateName: {{ $service.name }}-health-check-{{ $service.image.tag | replace "." "-" }}
         {{- if $service.rollout.analysis.performance }}
-        - templateName: {{ $service.name }}-performance-check
+        - templateName: {{ $service.name }}-performance-check-{{ $service.image.tag | replace "." "-" }}
         {{- end }}
         args: []
         {{- else }}
