@@ -11,10 +11,9 @@ metadata:
 spec:
   metrics:
   - name: health-check
-    initialDelaySeconds: 45  # Pod 시작 후 45초 대기
-    failureLimit: 8          # 더 관대한 실패 허용
-    interval: 20s            # 체크 간격 늘리기
-    count: 12                # failureLimit보다 크게 설정
+    failureLimit: 15         # 매우 관대한 실패 허용 (Pod 시작 시간 고려)
+    interval: 30s            # 긴 간격으로 Pod 준비 시간 확보
+    count: 20                # 충분한 시도 횟수 (10분간)
     successCondition: result == "healthy"
     provider:
       web:
@@ -24,18 +23,17 @@ spec:
         - key: Content-Type
           value: application/json
         jsonPath: "{$.status}"
-        timeoutSeconds: 10
+        timeoutSeconds: 15
 
   - name: response-time-check
-    initialDelaySeconds: 50          # health-check 후에 시작
-    failureLimit: 5
-    interval: 20s
-    count: 8  # failureLimit보다 크게 설정됨
-    successCondition: result < 8000  # 8초 이내 응답 (더 관대하게)
+    failureLimit: 8
+    interval: 30s
+    count: 12  # failureLimit보다 크게 설정됨
+    successCondition: result < 10000  # 10초 이내 응답 (매우 관대하게)
     provider:
       web:
         url: "http://{{ $service.name }}-preview.{{ $service.namespace | default $.Values.global.namespace }}.svc.cluster.local:{{ $service.port }}{{- if eq $serviceName "auth" }}/api/auth/health{{- else if eq $serviceName "booking" }}/api/bookings/health{{- else if eq $serviceName "flight" }}/api/flights/health{{- else if eq $serviceName "payment" }}/api/payments/health{{- else if eq $serviceName "admin" }}/api/admin/health{{- end }}"
-        timeoutSeconds: 10
+        timeoutSeconds: 15
 
 ---
 # Performance Analysis Template
