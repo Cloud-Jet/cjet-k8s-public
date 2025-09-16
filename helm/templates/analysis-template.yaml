@@ -11,6 +11,11 @@ metadata:
 spec:
   metrics:
   - name: health-check
+    initialDelaySeconds: 45  # Pod 시작 후 45초 대기
+    failureLimit: 8          # 더 관대한 실패 허용
+    interval: 20s            # 체크 간격 늘리기
+    count: 12                # failureLimit보다 크게 설정
+    successCondition: result == "healthy"
     provider:
       web:
         # 클러스터 내부 DNS가 아닌 Kubernetes API를 통한 헬스체크
@@ -20,22 +25,17 @@ spec:
           value: application/json
         jsonPath: "{$.status}"
         timeoutSeconds: 10
-    successCondition: result == "healthy"
-    initialDelaySeconds: 45  # Pod 시작 후 45초 대기
-    failureLimit: 8          # 더 관대한 실패 허용
-    interval: 20s            # 체크 간격 늘리기
-    count: 12                # failureLimit보다 크게 설정
 
   - name: response-time-check
-    provider:
-      web:
-        url: "http://{{ $service.name }}-preview.{{ $service.namespace | default $.Values.global.namespace }}.svc.cluster.local:{{ $service.port }}{{- if eq $serviceName "auth" }}/api/auth/health{{- else if eq $serviceName "booking" }}/api/bookings/health{{- else if eq $serviceName "flight" }}/api/flights/health{{- else if eq $serviceName "payment" }}/api/payments/health{{- else if eq $serviceName "admin" }}/api/admin/health{{- end }}"
-        timeoutSeconds: 10
-    successCondition: result < 8000  # 8초 이내 응답 (더 관대하게)
     initialDelaySeconds: 50          # health-check 후에 시작
     failureLimit: 5
     interval: 20s
     count: 8  # failureLimit보다 크게 설정됨
+    successCondition: result < 8000  # 8초 이내 응답 (더 관대하게)
+    provider:
+      web:
+        url: "http://{{ $service.name }}-preview.{{ $service.namespace | default $.Values.global.namespace }}.svc.cluster.local:{{ $service.port }}{{- if eq $serviceName "auth" }}/api/auth/health{{- else if eq $serviceName "booking" }}/api/bookings/health{{- else if eq $serviceName "flight" }}/api/flights/health{{- else if eq $serviceName "payment" }}/api/payments/health{{- else if eq $serviceName "admin" }}/api/admin/health{{- end }}"
+        timeoutSeconds: 10
 
 ---
 # Performance Analysis Template
