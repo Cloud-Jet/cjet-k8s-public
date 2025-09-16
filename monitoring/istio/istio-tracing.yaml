@@ -8,8 +8,8 @@ metadata:
 spec:
   meshConfig:
     enableTracing: true
-    defaultConfig:
-      tracing: {}   # disable legacy MeshConfig tracing options
+    # defaultConfig:
+    #   tracing: {}   # disable legacy MeshConfig tracing options
     extensionProviders:
     - name: jaeger
       opentelemetry:
