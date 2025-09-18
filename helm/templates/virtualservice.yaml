@@ -18,9 +18,9 @@ spec:
       uri: /api/auth/health
     route:
     - destination:
-        host: {{ .Values.services.auth.name }}
+        host: {{ .Values.services.auth.name }}-active
         port:
-          number: 80
+          number: {{ .Values.services.auth.port }}
     corsPolicy:
       allowOrigins:
       - exact: https://www.cloudjet.click
@@ -38,9 +38,9 @@ spec:
         prefix: /api/auth
     route:
     - destination:
-        host: {{ .Values.services.auth.name }}
+        host: {{ .Values.services.auth.name }}-active
         port:
-          number: 80
+          number: {{ .Values.services.auth.port }}
     corsPolicy:
       allowOrigins:
       - exact: https://www.cloudjet.click
@@ -63,9 +63,9 @@ spec:
       uri: /api/flights/airports
     route:
     - destination:
-        host: {{ .Values.services.flight.name }}
+        host: {{ .Values.services.flight.name }}-active
         port:
-          number: 80
+          number: {{ .Values.services.flight.port }}
     corsPolicy:
       allowOrigins:
       - exact: https://www.cloudjet.click
@@ -86,9 +86,9 @@ spec:
         prefix: /api/flights
     route:
     - destination:
-        host: {{ .Values.services.flight.name }}
+        host: {{ .Values.services.flight.name }}-active
         port:
-          number: 80
+          number: {{ .Values.services.flight.port }}
     corsPolicy:
       allowOrigins:
       - exact: https://www.cloudjet.click
@@ -109,9 +109,9 @@ spec:
         prefix: /api/bookings
     route:
     - destination:
-        host: {{ .Values.services.booking.name }}
+        host: {{ .Values.services.booking.name }}-active
         port:
-          number: 80
+          number: {{ .Values.services.booking.port }}
     corsPolicy:
       allowOrigins:
       - exact: https://www.cloudjet.click
@@ -132,9 +132,9 @@ spec:
         prefix: /api/payments
     route:
     - destination:
-        host: {{ .Values.services.payment.name }}
+        host: {{ .Values.services.payment.name }}-active
         port:
-          number: 80
+          number: {{ .Values.services.payment.port }}
     corsPolicy:
       allowOrigins:
       - exact: https://www.cloudjet.click

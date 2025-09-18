@@ -1,17 +1,35 @@
-# Istio Operator Configuration for CloudJet
-# Configures OpenTelemetry tracing with Jaeger
-apiVersion: install.istio.io/v1alpha1
-kind: IstioOperator
+# Istio ConfigMap Configuration for CloudJet
+# Configures Zipkin tracing with Jaeger
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: cloudjet-tracing
+  name: istio
   namespace: istio-system
-spec:
-  meshConfig:
-    enableTracing: true
+  labels:
+    app.kubernetes.io/name: istiod
+    app.kubernetes.io/instance: istiod
+    app.kubernetes.io/part-of: istio
+    install.operator.istio.io/owning-resource: unknown
+    istio.io/rev: default
+    release: istiod
+data:
+  mesh: |
     defaultConfig:
-      tracing: {}   # disable legacy MeshConfig tracing options
+      discoveryAddress: istiod.istio-system.svc:15012
+      tracing:
+        zipkin:
+          address: jaeger-all-in-one.monitoring.svc.cluster.local:9411
+    defaultProviders:
+      metrics:
+      - prometheus
+      tracing:
+      - jaeger
     extensionProviders:
     - name: jaeger
-      opentelemetry:
-        service: jaeger-collector.monitoring.svc.cluster.local
-        port: 4317
+      zipkin:
+        service: jaeger-all-in-one.monitoring.svc.cluster.local
+        port: 9411
+    enablePrometheusMerge: true
+    rootNamespace: istio-system
+    trustDomain: cluster.local
+  meshNetworks: 'networks: {}'

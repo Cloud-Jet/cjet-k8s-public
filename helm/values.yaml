@@ -141,13 +141,13 @@ config:
     db: 0
     ssl: true
   
-  # Service URLs
+  # Service URLs for inter-service communication
   serviceUrls:
-    auth: http://auth-service
-    flight: http://flight-service
-    booking: http://booking-service
-    payment: http://payment-service
-    admin: http://admin-service
+    auth: http://auth-service-active:5001
+    flight: http://flight-service-active:5002
+    booking: http://booking-service-active:5003
+    payment: http://payment-service-active:5005
+    admin: http://admin-service.admin.svc.cluster.local:80
   
   # Cache settings
   cache:
