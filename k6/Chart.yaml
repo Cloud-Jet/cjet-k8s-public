@@ -1,0 +1,6 @@
+apiVersion: v2
+name: k6-load-test
+description: K6 Load Testing for CLOUDJET
+type: application
+version: 0.1.0
+appVersion: "0.54.0"

@@ -1,0 +1,84 @@
+global:
+  namespace: "default"
+
+k6:
+  enabled: true
+  image:
+    repository: grafana/k6
+    tag: "0.54.0"
+    pullPolicy: IfNotPresent
+
+  job:
+    name: "load-test"
+    parallelism: 1
+    completions: 1
+    backoffLimit: 3
+    restartPolicy: "Never"
+
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "1Gi"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+
+  # Load test configuration
+  loadTest:
+    script: |
+      import http from 'k6/http';
+      import { check, sleep } from 'k6';
+      import { Counter, Rate, Trend } from 'k6/metrics';
+
+      export let errorRate = new Rate('errors');
+      export let responseTime = new Trend('response_time', true);
+      export let requests = new Counter('http_requests_total');
+
+      export let options = {
+        stages: [
+          { duration: '2m', target: 1000 },
+          { duration: '3m', target: 2000 },
+          { duration: '5m', target: 3000 },
+          { duration: '15m', target: 4000 },
+          { duration: '10m', target: 4000 },
+          { duration: '3m', target: 1000 },
+          { duration: '2m', target: 0 },
+        ],
+        thresholds: {
+          http_req_duration: ['p(95)<500'],
+          errors: ['rate<0.1'],
+        },
+      };
+
+      const BASE_URL = __ENV.BASE_URL || 'http://auth-service.user.svc.cluster.local';
+
+      export default function() {
+        let gateway = 'http://istio-gateway-external.istio-system.svc.cluster.local';
+
+        // Istio Gateway를 통한 API 호출 - Kiali에서 트래픽 표시
+        for (let i = 0; i < 30; i++) {
+          let headers = { 'Host': 'api.cloudjet.click' };
+          try {
+            http.get(`${gateway}/api/auth/health`, { headers: headers });
+            http.get(`${gateway}/api/flights/health`, { headers: headers });
+            http.get(`${gateway}/api/bookings/health`, { headers: headers });
+            http.get(`${gateway}/api/payments/health`, { headers: headers });
+          } catch (e) {
+            // 에러 무시하고 계속 진행
+          }
+        }
+
+        requests.add(120); // 30 * 4 requests per iteration
+
+        sleep(0.01); // 10ms 대기로 매우 빠른 요청
+      }
+
+    # Environment variables
+    env:
+      BASE_URL: "http://istio-gateway-external.istio-system.svc.cluster.local"
+
+  # Service monitor for Prometheus
+  serviceMonitor:
+    enabled: true
+    namespace: "monitoring"
+    interval: "30s"

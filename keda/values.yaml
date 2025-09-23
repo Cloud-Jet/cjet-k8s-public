@@ -14,14 +14,16 @@ keda:
       namespace: "user"
       targetDeployment: "auth-service"
       minReplicas: 2
-      maxReplicas: 8
+      maxReplicas: 50
       pollingInterval: 15
       cooldownPeriod: 180
       triggers:
-        - type: "prometheus"
-          metricName: "auth_service_rps"
-          query: 'rate(istio_requests_total{destination_service_name="auth-service"}[1m])'
-          threshold: "15"
+        - type: "cpu"
+          metricType: "Utilization"
+          value: "70"
+        - type: "memory"
+          metricType: "Utilization"
+          value: "80"
 
     # Flight Service - 검색 트래픽 변동 대응  
     flight-service:
@@ -30,18 +32,16 @@ keda:
       namespace: "user"
       targetDeployment: "flight-service"
       minReplicas: 2
-      maxReplicas: 12
+      maxReplicas: 50
       pollingInterval: 20
       cooldownPeriod: 240
       triggers:
-        - type: "prometheus"
-          metricName: "flight_service_rps"
-          query: 'rate(istio_requests_total{destination_service_name="flight-service"}[1m])'
-          threshold: "10"
-        - type: "prometheus"
-          metricName: "flight_service_latency"
-          query: 'histogram_quantile(0.95, rate(istio_request_duration_milliseconds_bucket{destination_service_name="flight-service"}[1m]))'
-          threshold: "800"
+        - type: "cpu"
+          metricType: "Utilization"
+          value: "70"
+        - type: "memory"
+          metricType: "Utilization"
+          value: "80"
 
     # Booking Service - 예약 처리 시간 중요
     booking-service:
@@ -50,18 +50,16 @@ keda:
       namespace: "user"
       targetDeployment: "booking-service"
       minReplicas: 2
-      maxReplicas: 15
+      maxReplicas: 50
       pollingInterval: 20
       cooldownPeriod: 300
       triggers:
-        - type: "prometheus"
-          metricName: "booking_service_rps"
-          query: 'rate(istio_requests_total{destination_service_name="booking-service"}[1m])'
-          threshold: "8"
-        - type: "prometheus"
-          metricName: "booking_service_latency"
-          query: 'histogram_quantile(0.95, rate(istio_request_duration_milliseconds_bucket{destination_service_name="booking-service"}[1m]))'
-          threshold: "1000"
+        - type: "cpu"
+          metricType: "Utilization"
+          value: "70"
+        - type: "memory"
+          metricType: "Utilization"
+          value: "80"
 
     # Payment Service - 결제 안정성 중요 (에러율 우선)
     payment-service:
@@ -70,18 +68,16 @@ keda:
       namespace: "user"
       targetDeployment: "payment-service"
       minReplicas: 1
-      maxReplicas: 6
+      maxReplicas: 50
       pollingInterval: 15
       cooldownPeriod: 300
       triggers:
-        - type: "prometheus"
-          metricName: "payment_service_error_rate"
-          query: 'rate(istio_requests_total{destination_service_name="payment-service",response_code!~"2.."}[1m]) / rate(istio_requests_total{destination_service_name="payment-service"}[1m]) * 100'
-          threshold: "3"
-        - type: "prometheus"
-          metricName: "payment_service_rps"
-          query: 'rate(istio_requests_total{destination_service_name="payment-service"}[1m])'
-          threshold: "5"
+        - type: "cpu"
+          metricType: "Utilization"
+          value: "70"
+        - type: "memory"
+          metricType: "Utilization"
+          value: "80"
 
     # Admin Service - 관리 기능 (안정적 운영)
     admin-service:
@@ -98,3 +94,4 @@ keda:
           metricName: "admin_service_rps"
           query: 'rate(istio_requests_total{destination_service_name="admin-service"}[1m])'
           threshold: "5"
+

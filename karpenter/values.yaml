@@ -9,7 +9,8 @@ karpenter:
       name: "default"
       instanceStorePolicy: "RAID0"
       amiFamily: "AL2023"
-      role: "eks-eksdapne2-vazh-ng"
+      role: "eks-eksdapne2-vazh-karpenter-node-instance-role"
+      instanceProfile: "eks-eksdapne2-vazh-karpenter-node-instance-profile"
       metadataOptions:
         httpEndpoint: "enabled"
         httpProtocolIPv6: "disabled"
@@ -25,16 +26,19 @@ karpenter:
           operator: "In"
           values: ["amd64"]
         - key: "karpenter.sh/capacity-type"
-          operator: "In" 
+          operator: "In"
           values: ["spot"]
         - key: "node.kubernetes.io/instance-type"
           operator: "In"
-          values: ["t3.large", "t3.xlarge", "t3.2xlarge"]
+          values: ["t3.large"]
+        - key: "topology.kubernetes.io/zone"
+          operator: "In"
+          values: ["ap-northeast-2a", "ap-northeast-2c"]
       limits:
-        cpu: "50"
-        memory: "100Gi"
+        cpu: "100"
+        memory: "400Gi"
       disruption:
         consolidationPolicy: "WhenUnderutilized"
-        expireAfter: "5m"
-      minReplicas: 1
-      maxReplicas: 10
+        expireAfter: "30m"
+      minReplicas: 2
+      maxReplicas: 25

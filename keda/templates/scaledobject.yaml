@@ -9,19 +9,33 @@ metadata:
   namespace: {{ $service.namespace | default $.Values.global.namespace }}
 spec:
   scaleTargetRef:
-    name: {{ $service.targetDeployment }}
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    name: {{ $service.targetDeployment }}-rollout
   minReplicaCount: {{ $service.minReplicas | default 1 }}
   maxReplicaCount: {{ $service.maxReplicas | default 10 }}
   pollingInterval: {{ $service.pollingInterval | default 30 }}
   cooldownPeriod: {{ $service.cooldownPeriod | default 300 }}
   triggers:
   {{- range $trigger := $service.triggers }}
+  {{- if eq $trigger.type "cpu" }}
+  - type: cpu
+    metadata:
+      type: {{ $trigger.metricType | default "Utilization" }}
+      value: "{{ $trigger.value | default 70 }}"
+  {{- else if eq $trigger.type "memory" }}
+  - type: memory
+    metadata:
+      type: {{ $trigger.metricType | default "Utilization" }}
+      value: "{{ $trigger.value | default 80 }}"
+  {{- else }}
   - type: prometheus
     metadata:
-      serverAddress: {{ $.Values.keda.prometheus.serverAddress | default "http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090" }}
+      serverAddress: "http://prometheus-prometheus.monitoring.svc.cluster.local:9090"
       metricName: {{ $trigger.metricName | default "service_metric" }}
       query: {{ $trigger.query | quote }}
       threshold: "{{ $trigger.threshold | default 10 }}"
+  {{- end }}
   {{- end }}
 {{- end }}
 {{- end }}
