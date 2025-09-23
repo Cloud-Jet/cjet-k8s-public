@@ -26,7 +26,7 @@ services:
     resources:
       requests:
         memory: "256Mi"
-        cpu: "250m"
+        cpu: "100m"
       limits:
         memory: "512Mi"
         cpu: "500m"
@@ -48,7 +48,7 @@ services:
     resources:
       requests:
         memory: "256Mi"
-        cpu: "250m"
+        cpu: "100m"
       limits:
         memory: "512Mi"
         cpu: "500m"
@@ -70,7 +70,7 @@ services:
     resources:
       requests:
         memory: "256Mi"
-        cpu: "250m"
+        cpu: "100m"
       limits:
         memory: "512Mi"
         cpu: "500m"
@@ -82,7 +82,7 @@ services:
       repository: public.ecr.aws/v3g6g4v7/cj-payment-svc
       tag: v2.0.3
     port: 5005
-    replicas: 1
+    replicas: 0
     rollout:
       enabled: true
       autoPromotion: true
@@ -92,7 +92,7 @@ services:
     resources:
       requests:
         memory: "256Mi"
-        cpu: "250m"
+        cpu: "100m"
       limits:
         memory: "512Mi"
         cpu: "500m"
@@ -115,7 +115,7 @@ services:
     resources:
       requests:
         memory: "256Mi"
-        cpu: "250m"
+        cpu: "100m"
       limits:
         memory: "512Mi"
         cpu: "500m"
@@ -196,29 +196,6 @@ istio:
   sidecarInjection:
     enabled: true
 
-# KEDA Configuration
-keda:
-  enabled: false
-  scaledObjects:
-    - name: booking-service
-      enabled: false
-      targetDeployment: booking-service
-      namespace: user
-      minReplicas: 1
-      maxReplicas: 10
-      pollingInterval: 30
-      cooldownPeriod: 300
-      prometheus:
-        # Option 1: Istio 요청 수 기반 스케일링 (Service Mesh 환경)
-        metricName: istio_request_rate
-        query: rate(istio_requests_total{destination_service_name="booking-service"}[1m])
-        threshold: 10
-        
-        # Option 2: 일반 HTTP 요청 수 기반 스케일링 (PromQL 직접 사용)
-        # 애플리케이션이 /metrics 엔드포인트로 메트릭을 노출하는 경우
-        # metricName: http_requests_per_second
-        # query: rate(http_requests_total{job="booking-service"}[1m])
-        # threshold: 5
 
 # Namespace creation
 namespaces:

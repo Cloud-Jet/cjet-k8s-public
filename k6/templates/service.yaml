@@ -1,0 +1,17 @@
+{{- if .Values.k6.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: k6-metrics
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: k6-load-test
+spec:
+  selector:
+    app: k6-load-test
+  ports:
+  - name: prometheus
+    port: 6565
+    targetPort: 6565
+  type: ClusterIP
+{{- end }}

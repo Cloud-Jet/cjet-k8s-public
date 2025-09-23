@@ -1,0 +1,10 @@
+{{- if .Values.k6.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-script
+  namespace: {{ .Values.global.namespace }}
+data:
+  script.js: |
+{{ .Values.k6.loadTest.script | indent 4 }}
+{{- end }}

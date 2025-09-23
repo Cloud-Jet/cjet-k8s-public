@@ -1,0 +1,45 @@
+{{- if .Values.k6.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.k6.job.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  parallelism: {{ .Values.k6.job.parallelism }}
+  completions: {{ .Values.k6.job.completions }}
+  backoffLimit: {{ .Values.k6.job.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        app: k6-load-test
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "6565"
+    spec:
+      restartPolicy: {{ .Values.k6.job.restartPolicy }}
+      containers:
+      - name: k6
+        image: "{{ .Values.k6.image.repository }}:{{ .Values.k6.image.tag }}"
+        imagePullPolicy: {{ .Values.k6.image.pullPolicy }}
+        command: ["k6"]
+        args:
+        - "run"
+        - "/scripts/script.js"
+        env:
+        {{- range $key, $value := .Values.k6.loadTest.env }}
+        - name: {{ $key }}
+          value: "{{ $value }}"
+        {{- end }}
+        ports:
+        - containerPort: 6565
+          name: prometheus
+        volumeMounts:
+        - name: k6-script
+          mountPath: /scripts
+        resources:
+{{ toYaml .Values.k6.resources | indent 10 }}
+      volumes:
+      - name: k6-script
+        configMap:
+          name: k6-script
+{{- end }}
