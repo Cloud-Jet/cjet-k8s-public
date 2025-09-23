@@ -85,7 +85,7 @@ services:
       repository: public.ecr.aws/v3g6g4v7/cj-payment-svc
       tag: v2.0.3
     port: 5005
-    replicas: 0
+    replicas: 2
     rollout:
       enabled: true
       autoPromotion: true
