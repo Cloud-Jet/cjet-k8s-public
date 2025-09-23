@@ -14,14 +14,15 @@ services:
     name: auth-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-auth-svc
-      tag: v1.0.0
+      tag: v1.0.27
     port: 5001
     replicas: 2
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 5
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
@@ -42,8 +43,9 @@ services:
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 5
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
@@ -58,14 +60,15 @@ services:
     name: booking-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-booking-svc
-      tag: v2.0.3
+      tag: v1.0.18
     port: 5003
     replicas: 2
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 5
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
@@ -86,8 +89,9 @@ services:
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 5
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
@@ -109,8 +113,9 @@ services:
     rollout:
       enabled: true
       autoPromotion: true
+      autoPromotionSeconds: 5
       analysis:
-        enabled: true
+        enabled: false
         performance: false
     resources:
       requests:
@@ -141,13 +146,13 @@ config:
     db: 0
     ssl: true
   
-  # Service URLs
+  # Service URLs for inter-service communication
   serviceUrls:
-    auth: http://auth-service
-    flight: http://flight-service
-    booking: http://booking-service
-    payment: http://payment-service
-    admin: http://admin-service
+    auth: http://auth-service-active:5001
+    flight: http://flight-service-active:5002
+    booking: http://booking-service-active:5003
+    payment: http://payment-service-active:5005
+    admin: http://admin-service.admin.svc.cluster.local:80
   
   # Cache settings
   cache:

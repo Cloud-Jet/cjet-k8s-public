@@ -3,8 +3,11 @@ secrets.yaml
 secrets.yml
 *.secret.yaml
 *.secret.yml
+# external-secrets.yaml은 제외하고 다른 secrets 파일만 무시
 *-secrets.yaml
+!external-secrets.yaml
 *-secrets.yml
+!external-secrets.yml
 
 # Environment files
 .env

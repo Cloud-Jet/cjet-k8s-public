@@ -3,7 +3,8 @@
     "allow": [
       "Bash(kubectl delete:*)",
       "Bash(kubectl rollout restart:*)",
-      "Bash(kubectl get pods:*)"
+      "Bash(kubectl get pods:*)",
+      "Bash(kubectl get pod:*)"
     ],
     "deny": [],
     "ask": []
