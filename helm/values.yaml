@@ -21,9 +21,6 @@ services:
       enabled: true
       autoPromotion: true
       autoPromotionSeconds: 5
-      analysis:
-        enabled: false
-        performance: false
     resources:
       requests:
         memory: "256Mi"
@@ -44,9 +41,6 @@ services:
       enabled: true
       autoPromotion: true
       autoPromotionSeconds: 5
-      analysis:
-        enabled: false
-        performance: false
     resources:
       requests:
         memory: "256Mi"
@@ -67,9 +61,6 @@ services:
       enabled: true
       autoPromotion: true
       autoPromotionSeconds: 5
-      analysis:
-        enabled: false
-        performance: false
     resources:
       requests:
         memory: "256Mi"
@@ -90,9 +81,6 @@ services:
       enabled: true
       autoPromotion: true
       autoPromotionSeconds: 5
-      analysis:
-        enabled: false
-        performance: false
     resources:
       requests:
         memory: "256Mi"
@@ -114,9 +102,6 @@ services:
       enabled: true
       autoPromotion: true
       autoPromotionSeconds: 5
-      analysis:
-        enabled: false
-        performance: false
     resources:
       requests:
         memory: "256Mi"
