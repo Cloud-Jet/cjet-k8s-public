@@ -34,7 +34,7 @@ services:
     name: flight-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-flight-svc
-      tag: v1.0.0
+      tag: v1.0.31
     port: 5002
     replicas: 2
     rollout:
