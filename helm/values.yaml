@@ -14,7 +14,7 @@ services:
     name: auth-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-auth-svc
-      tag: v1.0.35
+      tag: v1.0.36
     port: 5001
     replicas: 2
     rollout:
