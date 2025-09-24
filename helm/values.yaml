@@ -74,7 +74,7 @@ services:
     name: payment-service
     image:
       repository: public.ecr.aws/v3g6g4v7/cj-payment-svc
-      tag: v1.0.30
+      tag: v1.0.31
     port: 5005
     replicas: 2
     rollout:
