@@ -90,6 +90,6 @@ spec:
       {{- if $service.rollout.autoPromotionSeconds }}
       autoPromotionSeconds: {{ $service.rollout.autoPromotionSeconds }}
       {{- end }}
-      scaleDownDelaySeconds: 30
+      scaleDownDelaySeconds: 10
 {{- end }}
 {{- end }}
