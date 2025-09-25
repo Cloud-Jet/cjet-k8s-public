@@ -56,7 +56,7 @@ spec:
             path: /api/admin/health
             {{- end }}
             port: {{ $service.port }}
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           periodSeconds: 10
           failureThreshold: 3
         readinessProbe:
@@ -90,6 +90,6 @@ spec:
       {{- if $service.rollout.autoPromotionSeconds }}
       autoPromotionSeconds: {{ $service.rollout.autoPromotionSeconds }}
       {{- end }}
-      scaleDownDelaySeconds: 10
+      scaleDownDelaySeconds: 30
 {{- end }}
 {{- end }}
