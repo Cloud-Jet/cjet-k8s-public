@@ -33,22 +33,14 @@ graph TD
  
 ### 서비스 구조
  
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Istio Gateway                           │
-│                  (External LoadBalancer)                    │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-┌─────────────────────┴───────────────────────────────────────┐
-│                 Virtual Service                             │
-│              (Traffic Routing)                              │
-└─┬─────────────┬─────────────┬─────────────┬─────────────────┘
-  │             │             │             │
-┌─▼─────┐ ┌─────▼─┐ ┌─────────▼┐ ┌─────────▼┐ ┌──────────────▼┐
-│ Auth  │ │Flight │ │ Booking │ │ Admin   │ │    Payment    │
-│Service│ │Service│ │ Service │ │Service  │ │   Service     │
-│(5001) │ │(5002) │ │ (5003)  │ │(5004)   │ │   (5005)      │
-└───────┘ └───────┘ └─────────┘ └─────────┘ └───────────────┘
+```mermaid
+graph TD
+    GW["Istio Gateway<br/>(External LoadBalancer)"] --> VS["Virtual Service<br/>(Traffic Routing)"]
+    VS --> AUTH["Auth Service<br/>(5001)"]
+    VS --> FLIGHT["Flight Service<br/>(5002)"]
+    VS --> BOOKING["Booking Service<br/>(5003)"]
+    VS --> ADMIN["Admin Service<br/>(5004)"]
+    VS --> PAYMENT["Payment Service<br/>(5005)"]
 ```
  
 ### 네임스페이스 구조
